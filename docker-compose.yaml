@@ -1,0 +1,502 @@
+version: "3.6"
+services:
+
+######## TEST @@@@@@@@@@@@@@@
+
+  traefik:
+    image: traefik:alpine
+    container_name: traefik
+    domainname: ${DOMAINNAME}
+    hostname: traefik
+#    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${USERDIR}/dockerha/uavtraefik:/etc/traefik
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+    command:
+      - "--docker"
+      - "--api"
+      - "--logLevel=DEBUG"
+      - "--debug=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+#      - "traefik.frontend.rule=Host:traefik.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /traefik"
+      - "traefik.backend=traefik"
+      - "traefik.port=8080"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+#      - "traefik.frontend.entryPoints=http"
+#      - "traefik.docker.network=${NETWORK_NAME}"
+
+
+  whoami:
+    image: containous/whoami
+    container_name: whoami
+    hostname: whoami
+    domainname: ${DOMAINNAME}
+#    restart: always
+    ports:
+      - "81:80"
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+#      - "traefik.frontend.rule=Host:whoami.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /whoami"
+      - "traefik.backend=whoami"
+
+
+#Portainer - WebUI for Containers
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    domainname: ${DOMAINNAME}
+    hostname: portainer
+#    restart: always
+#    command: --no-auth
+#      - "--admin-password "Aropat0909!""
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${USERDIR}/dockerha/uavportainer/data:/data
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+#      - "traefik.frontend.rule=Host:portainer.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /portainer"
+      - "traefik.backend=portainer"
+      - "traefik.port=9000"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+#      - "traefik.frontend.entryPoints=http"
+
+
+# Watchtower - Automatic Update of Containers/Apps
+  watchtower:
+    image: v2tec/watchtower
+    container_name: watchtower
+    domainname: ${DOMAINNAME}
+    hostname: watchtower
+#    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+    networks:
+      - ${NETWORK_NAME}
+
+
+#Openssl - self signed certificates for Containers
+  openssl:
+#    image: centos:7
+    build:
+      context: ${USERDIR}/dockerha/ #when alternative Dockerfile name used, context must be
+      dockerfile: Dockerfile.openssl
+    container_name: openssl
+    domainname: ${DOMAINNAME}
+    hostname: openssl
+    volumes:
+      - ${USERDIR}/dockerha/cert:/cert
+      - ${USERDIR}/dockerha/shared/create-cert.sh:/shared/create-cert.sh
+    command:
+      - /bin/sh
+      - create-cert.sh
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+
+
+######### FRONTENDS ##########
+
+# Home Assistant - Smart Home Hub
+  homeassistant:
+    image: homeassistant/home-assistant
+    container_name: homeassistant
+    domainname: ${DOMAINNAME}
+    hostname: homeassistant
+#    restart: always
+#    devices:
+#      - /dev/ttyUSB0:/dev/ttyUSB0
+#      - /dev/ttyUSB1:/dev/ttyUSB1
+#      - /dev/ttyACM0:/dev/ttyACM0
+    volumes:
+      - ${USERDIR}/dockerha/uavha:/config
+      - /etc/localtime:/etc/localtime:ro
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+#    ports:
+#      - "8122:8122"
+    privileged: true
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=homeassistant"
+#      - "traefik.frontend.rule=Host:hass.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /hass"
+      - "traefik.port=8121"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+
+# NextCloud – Your Own Cloud Storage
+  nextcloud:
+    image: linuxserver/nextcloud
+    container_name: nextcloud
+    domainname: ${DOMAINNAME}
+    hostname: nextcloud
+#      restart: always
+    volumes:
+      - ${USERDIR}/dockerha/uavnextcloud:/config
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+#    ports:
+#      - "444:443"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    networks:
+      - ${NETWORK_NAME}
+#        - uavhanet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=nextcloud"
+#        - "traefik.frontend.rule=Host:nextcloud.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /nextcloud"
+      - "traefik.port=443"
+      - "traefik.protocol=https"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+
+# phpMyAdmin - WebUI for MariaDB
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    domainname: ${DOMAINNAME}
+    hostname: phpmyadmin
+#    restart: always
+    links:
+      - mariadb:db
+#    ports:
+#      - 82:80
+    environment:
+      - PMA_HOST=mariadb
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=pma"
+#      - "traefik.frontend.rule=Host:pma.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /pma"
+      - "traefik.port=80"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+
+
+######### UTILITIES ##########
+
+# Organizer - Unified HTPC/Home Server Web Interface
+  organizr:
+    image: lsiocommunity/organizr
+    container_name: organizr
+    domainname: ${DOMAINNAME}
+    hostname: organizr
+#    restart: always
+    volumes:
+      - ${USERDIR}/dockerha/uavorganizr:/config
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+#    ports:
+#      - "81:80"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=organizr"
+#      - "traefik.frontend.rule=Host:organizr.${DOMAINNAME}" 
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /organizr"
+      - "traefik.port=80"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+
+# MariaDB – Database Server for your Apps
+  mariadb:
+    image: "linuxserver/mariadb"
+    container_name: "mariadb"
+    domainname: ${DOMAINNAME}
+    hostname: mariadb
+#  restart: always
+    volumes:
+      - ${USERDIR}/dockerha/uavmariadb:/config
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+    ports:
+      - target: 3306
+        published: 3306
+        protocol: tcp
+        mode: host
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+
+
+
+######### HOME ASSISTANT RELATED ##########
+
+## NodeRed - Visualizing tasks
+  nodered:
+    image: nodered/node-red-docker:slim-v8
+    container_name: node-red
+    domainname: ${DOMAINNAME}
+    hostname: nodered
+#    restart: always
+    volumes:
+      - ${USERDIR}/dockerha/uavnodered:/data
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+    command: ["npm", "install", "node-red-contrib-home-assistant-websocket"]
+#    ports:
+#      - "81:80"
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=nodered"
+#      - "traefik.frontend.rule=Host:nodered.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /nodered"
+      - "traefik.port=80"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+
+## Mosquitto - MQTT broker 
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    domainname: ${DOMAINNAME}
+    hostname: mosquitto
+#    restart: on-failure
+    volumes:
+      - ${USERDIR}/dockerha/uavmosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ${USERDIR}/dockerha/uavmosquitto/data:/data
+      - ${USERDIR}/dockerha/uavmosquitto/log:/log
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+#    ports:
+#      - "81:80"
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=mosquitto"
+#      - "traefik.frontend.rule=Host:mosquitto.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /mosquitto"
+      - "traefik.port=80"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+
+## TasmodaAdmin - Visual admin for Tasmoda devices
+  tasmoadmin:
+    image: raymondmm/tasmoadmin
+    container_name: tasmoadmin
+    domainname: ${DOMAINNAME}
+    hostname: tasmoadmin
+#    restart: always
+    volumes:
+      - ${USERDIR}/dockerha/uavtasmoadmin/data:/data
+      - ${USERDIR}/dockerha/uavtasmoadmin/log:/log
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+#    ports:
+#    #      - "81:80"
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=tasmoadmin"
+#      - "traefik.frontend.rule=Host:tasmoadmin.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /tasmoadmin"
+      - "traefik.port=80"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+
+## Grafana  - Graphical data  presentation
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    domainname: ${DOMAINNAME}
+    hostname: grafana
+#    restart: always
+#    ports:
+#      - "81:80"
+    volumes:
+      - ${USERDIR}/dockerha/uavgrafana/data:/data
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=grafana"
+#      - "traefik.frontend.rule=Host:grafana.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /grafana"
+      - "traefik.port=80"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+
+## Influxdb  - Time series database 
+  influxdb:
+    image: influxdb
+    container_name: influxdb
+    domainname: ${DOMAINNAME}
+    hostname: influxdb
+#    restart: on-failure
+#    ports:
+#      - "81:80"
+    volumes:
+      - ${USERDIR}/dockerha/uavinfluxdb/data:/var/lib/influxdb
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=influxdb"
+#      - "traefik.frontend.rule=Host:influxdb.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /influxdb"
+      - "traefik.port=80"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=host"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+
+networks:
+  uavhanet:
+    driver: overlay
+#  public:
+#    external:
+#      name: public
+#volumes:
+#  shared:  
+#  cert:

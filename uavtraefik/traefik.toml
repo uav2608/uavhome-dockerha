@@ -1,0 +1,81 @@
+#traefik.toml
+################################################################
+# Global configuration
+################################################################
+
+# Traefik logs file
+# If not defined, logs to stdout
+#
+# Optional
+#
+[traefikLog]
+  filepath = "/etc/traefik/traefik.log"
+  format = "json"
+
+# Access logs file
+#
+# Optional
+[accessLog]
+  filepath = "/etc/traefik/access.log"
+  format = "json"
+
+debug = true
+
+logLevel = "DEBUG" #"ERROR" #DEBUG, INFO, WARN, ERROR, FATAL, PANIC
+
+#InsecureSkipVerify = true
+defaultEntryPoints = ["http", "https"]
+
+# WEB interface of Traefik - it will show web page with overview of frontend an$
+[api]
+  entryPoint = "traefik"
+  dashboard = true
+  address = ":8080"
+#  usersFile = "/shared/.htpasswd"
+
+# Force HTTPS
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+      [[entryPoints.https.tls.certificates]]  
+      certFile = "/cert/traefik.crt"
+      keyFile = "/cert/traefik.key"
+
+
+[file]
+watch = true
+#  filename = "/etc/traefik/rules.toml"
+
+# Let's encrypt configuration
+#[acme]
+#email = "uav2608@gmail.com" #any email id will work
+#storage="/etc/traefik/acme/acme.json"
+#entryPoint = "https"
+#acmeLogging=true
+#onDemand = false #create certificate when container is created
+#[acme.dnsChallenge]
+#  provider = "cloudflare"
+#  delayBeforeCheck = 0
+#[[acme.domains]]
+#   main = "uavhome.club"
+#[[acme.domains]]
+#   main = "*.uavhome.club"
+
+# Connection to docker host system (docker.sock)
+
+[docker]
+Endpoint = "unix:///var/run/docker.sock"
+Domain = "192.168.1.117"
+#Domain = "docker.localhost"
+watch = true
+SwarmMode = true
+#network = "public"
+network = "dockerha_uavhanet"
+# This will hide all docker containers that don't have explicitly
+# set label to "enable"
+ExposedRyDefault = false
