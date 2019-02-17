@@ -78,7 +78,7 @@ services:
     domainname: ${DOMAINNAME}
     hostname: portainer
 #    restart: always
-#    command: --no-auth
+    command: --no-auth
 #      - "--admin-password "Aropat0909!""
     ports:
       - "9000:9000"
@@ -86,7 +86,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${USERDIR}/dockerha/uavportainer/data:/data
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
     environment:
       - TZ=${TZ}
     networks:
@@ -164,7 +164,7 @@ services:
       - ${USERDIR}/dockerha/uavha:/config
       - /etc/localtime:/etc/localtime:ro
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
 #    ports:
 #      - "8123:8123"
     privileged: true
@@ -204,7 +204,7 @@ services:
     volumes:
       - ${USERDIR}/dockerha/uavnextcloud:/config
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
 #    ports:
 #      - "444:443"
     environment:
@@ -283,7 +283,7 @@ services:
     volumes:
       - ${USERDIR}/dockerha/uavorganizr:/config
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
 #    ports:
 #      - "81:80"
     environment:
@@ -322,7 +322,7 @@ services:
     volumes:
       - ${USERDIR}/dockerha/uavmariadb:/config
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
     ports:
       - target: 3306
         published: 3306
@@ -350,7 +350,7 @@ services:
     volumes:
       - ${USERDIR}/dockerha/uavnodered:/data
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
     command: ["npm", "install", "node-red-contrib-home-assistant-websocket"]
 #    ports:
 #      - "81:80"
@@ -390,7 +390,7 @@ services:
       - ${USERDIR}/dockerha/uavmosquitto/data:/data
       - ${USERDIR}/dockerha/uavmosquitto/log:/log
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
 #    ports:
 #      - "81:80"
     environment:
@@ -428,7 +428,7 @@ services:
       - ${USERDIR}/dockerha/uavtasmoadmin/data:/data
       - ${USERDIR}/dockerha/uavtasmoadmin/log:/log
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
 #    ports:
 #    #      - "81:80"
     environment:
@@ -467,7 +467,7 @@ services:
     volumes:
       - ${USERDIR}/dockerha/uavgrafana/data:/var/lib/grafana
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
     environment:
       - TZ=${TZ}
     networks:
@@ -505,7 +505,7 @@ services:
       - ${USERDIR}/dockerha/uavinfluxdb/data:/var/lib/influxdb
       - ${USERDIR}/dockerha/uavinfluxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
       - ${USERDIR}/dockerha/shared:/shared
-      - ${USERDIR}/dockerha/cert:/cert
+#      - ${USERDIR}/dockerha/cert:/cert
     environment:
       - TZ=${TZ}
       - INFLUX_GRAPHITE_ENABLED='true'

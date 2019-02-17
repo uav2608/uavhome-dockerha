@@ -70,12 +70,12 @@ watch = true
 
 [docker]
 Endpoint = "unix:///var/run/docker.sock"
-Domain = "192.168.1.117"
+Domain = "uavhome.test"
 #Domain = "docker.localhost"
 watch = true
 SwarmMode = true
-#network = "public"
-network = "dockerha_uavhanet"
+#nietwork = "public"
+network = "uavhanet"
 # This will hide all docker containers that don't have explicitly
 # set label to "enable"
 ExposedRyDefault = false
