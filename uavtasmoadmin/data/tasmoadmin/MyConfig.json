@@ -1,0 +1,17 @@
+{
+    "ota_server_ssl": "0",
+    "ota_server_ip": "",
+    "ota_server_port": "",
+    "username": "",
+    "password": "",
+    "refreshtime": "8",
+    "current_git_tag": "v1.6.0",
+    "update_automatic_lang": "EN",
+    "nightmode": "auto",
+    "login": "1",
+    "scan_from_ip": "192.168.178.2",
+    "scan_to_ip": "192.168.178.254",
+    "homepage": "start",
+    "check_for_updates": "1",
+    "minimize_resources": "1"
+}

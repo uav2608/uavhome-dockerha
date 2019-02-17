@@ -34,6 +34,9 @@ services:
       - "traefik.backend=traefik"
       - "traefik.port=8080"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https" 
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -59,8 +62,13 @@ services:
     labels:
       - "traefik.enable=true"
 #      - "traefik.frontend.rule=Host:whoami.${DOMAINNAME}"
+      - "traefik.port=80"
       - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /whoami"
       - "traefik.backend=whoami"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
+
 
 
 #Portainer - WebUI for Containers
@@ -90,6 +98,9 @@ services:
       - "traefik.backend=portainer"
       - "traefik.port=9000"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -155,7 +166,7 @@ services:
       - ${USERDIR}/dockerha/shared:/shared
       - ${USERDIR}/dockerha/cert:/cert
 #    ports:
-#      - "8122:8122"
+#      - "8123:8123"
     privileged: true
     environment:
       - PUID=${PUID}
@@ -168,8 +179,11 @@ services:
       - "traefik.backend=homeassistant"
 #      - "traefik.frontend.rule=Host:hass.${DOMAINNAME}"
       - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /hass"
-      - "traefik.port=8121"
+      - "traefik.port=8123"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -207,6 +221,9 @@ services:
       - "traefik.port=443"
       - "traefik.protocol=https"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -240,6 +257,9 @@ services:
       - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /pma"
       - "traefik.port=80"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -279,6 +299,9 @@ services:
       - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /organizr"
       - "traefik.port=80"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -342,6 +365,9 @@ services:
       - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /nodered"
       - "traefik.port=80"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -378,6 +404,9 @@ services:
       - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /mosquitto"
       - "traefik.port=80"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -413,6 +442,9 @@ services:
       - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /tasmoadmin"
       - "traefik.port=80"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -433,7 +465,7 @@ services:
 #    ports:
 #      - "81:80"
     volumes:
-      - ${USERDIR}/dockerha/uavgrafana/data:/data
+      - ${USERDIR}/dockerha/uavgrafana/data:/var/lib/grafana
       - ${USERDIR}/dockerha/shared:/shared
       - ${USERDIR}/dockerha/cert:/cert
     environment:
@@ -447,6 +479,9 @@ services:
       - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /grafana"
       - "traefik.port=80"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -468,10 +503,12 @@ services:
 #      - "81:80"
     volumes:
       - ${USERDIR}/dockerha/uavinfluxdb/data:/var/lib/influxdb
+      - ${USERDIR}/dockerha/uavinfluxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
       - ${USERDIR}/dockerha/shared:/shared
       - ${USERDIR}/dockerha/cert:/cert
     environment:
       - TZ=${TZ}
+      - INFLUX_GRAPHITE_ENABLED='true'
     networks:
       - ${NETWORK_NAME}
     labels:
@@ -481,6 +518,9 @@ services:
       - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /influxdb"
       - "traefik.port=80"
       - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http,https"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
       - "traefik.frontend.headers.contentTypeNosniff=true"
